@@ -1,0 +1,5 @@
+timestamp,site_id,spot_type,occupied,capacity,source
+2026-11-16 08:00,snow-way,yellow,248,260,manual_count
+2026-11-16 08:00,snow-way,red,17,20,manual_count
+2026-11-16 08:00,snow-way,visitor,99,100,manual_count
+2026-11-16 08:00,snow-way,ada,19,20,manual_count

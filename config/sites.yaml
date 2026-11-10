@@ -1,0 +1,102 @@
+# WhereUPark site configuration: the single source of truth for site structure.
+#
+# STATUS: PLACEHOLDER. Capacities come from the Project Charter estimates (Table 1).
+# The spot-type mixes are working assumptions until the site audit (Deliverable 1)
+# supplies real counts.
+#
+# To replace placeholders with real audit numbers, give a site an explicit `counts:`
+# map. Explicit counts always override `mix` percentages, e.g.
+#
+#   counts: { red: 22, yellow: 251, visitor: 108, ada: 19 }
+#
+# Spot types:
+#   red      Red (employee) permit
+#   yellow   Yellow permit
+#   visitor  Visitor / pay station
+#   ada      Accessible (ADA placard)
+#   other    Not yet classified (only used where the mix is incomplete)
+
+spot_types:
+  red:     { label: "Red permit",    color: "#D64545" }
+  yellow:  { label: "Yellow permit", color: "#E8B22E" }
+  visitor: { label: "Visitor",       color: "#3B82C4" }
+  ada:     { label: "ADA",           color: "#7B5EA7" }
+  other:   { label: "Unclassified",  color: "#8A8F98" }
+
+# Reusable mixes (fractions of capacity).
+mixes:
+  # All garages: 5% red, 65% yellow, 25% visitor, plus 5% ADA (garages other than East End).
+  garage_standard: { red: 0.05, yellow: 0.65, visitor: 0.25, ada: 0.05 }
+  # East End: same garage structure, but no ADA placeholder. Its ADA and other data will
+  # come from the existing in-garage sensor system. The remaining 5% stays "other"
+  # until that integration (or the audit) classifies it.
+  garage_east_end: { red: 0.05, yellow: 0.65, visitor: 0.25, other: 0.05 }
+  # Simon Lot: 90% yellow, 5% red, 5% ADA.
+  simon_lot:       { red: 0.05, yellow: 0.90, ada: 0.05 }
+
+sites:
+  - id: simon-lot
+    name: Simon Lot
+    kind: lot
+    levels: 0
+    capacity: 200          # Charter estimate
+    mix: simon_lot
+    data_source: parklio   # cameras: 4
+    location: { lat: 38.6489, lng: -90.3108 }   # approximate. Confirm during audit.
+
+  - id: snow-way
+    name: Snow Way Garage
+    kind: garage
+    levels: 4
+    capacity: 400          # Charter estimate
+    mix: garage_standard
+    data_source: parklio   # cameras: 12
+    location: { lat: 38.6459, lng: -90.3155 }   # approximate
+
+  - id: duc
+    name: DUC Garage
+    kind: garage
+    levels: 3
+    capacity: 400          # Charter estimate
+    mix: garage_standard
+    data_source: parklio   # cameras: 12
+    location: { lat: 38.6471, lng: -90.3101 }   # approximate
+
+  - id: millbrook
+    name: Millbrook Garage
+    kind: garage
+    levels: 4
+    capacity: 500          # Charter estimate
+    mix: garage_standard
+    data_source: parklio   # cameras: 16
+    location: { lat: 38.6503, lng: -90.3128 }   # approximate
+
+  - id: east-end
+    name: East End Garage
+    kind: garage
+    levels: 4              # placeholder
+    # Not in the charter's cost table. The charter puts the four garages at ~2,300
+    # spaces in total; 2,300 minus Snow Way, DUC and Millbrook (1,300) leaves ~1,000.
+    capacity: 1000
+    mix: garage_east_end
+    data_source: east_end_sensors   # existing red/green spot sensors. Integration only.
+    location: { lat: 38.6478, lng: -90.3020 }   # approximate
+
+# Who may park where. Confirmed by the project team, Nov 2026:
+#   red permit     -> red spaces only
+#   yellow permit  -> yellow spaces only
+#   visitor        -> visitor spaces any time, plus yellow spaces 5:00 p.m.-7:00 a.m.
+#                     on weekdays and all day on weekends
+# These rules hold year-round (school year and summer). Red spaces always require a red
+# permit. The free_hours window may run overnight (start later than end).
+eligibility:
+  free_hours: { start: "17:00", end: "07:00", weekends: all_day }
+  permits:
+    red:
+      always: [red]
+    yellow:
+      always: [yellow]
+    visitor:
+      always: [visitor]
+      during_free_hours: [yellow]
+  ada_placard_adds: [ada]
